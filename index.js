@@ -53,6 +53,10 @@ app.listen(8080, () => {
 
 app.use(express.static('public'));
 
+const express = require('express'),
+  morgan = require('morgan');
+
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
