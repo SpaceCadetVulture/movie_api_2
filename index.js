@@ -46,20 +46,42 @@ app.get('/', (req, res) => {
     res.json(topMovies);
   });
 
+  app.get('/movies/title', (req, res) => {
+    res.send('Successful get one Movie');
+  });
+
+  app.get('/movies/genre/:name', (req, res) => {
+    res.send('successfully get genre');
+  });
+
+  app.get('/movies/director/:name', (req, res) => {
+    res.send('successfully get director');
+  });
+
+  app.post('/users', (req, res) => {
+    res.send('successful register user');
+  });
+
+  app.put('/users/:username', (req, res) => {
+    res.send('successful edit user');
+  });
+
+  app.post('/users/:username/movies/:movie-id', (req, res) => {
+    res.send('successfully add movie to favorites');
+  });
+
+  app.delete('/users/:username/movies/:movie-id', (req, res) => {
+    res.send('successfully delete movie from favorites');
+  });
+
+  app.delete('/users/:username', (req, res) => {
+    res.send('successfully delete user');
+  });
+
+
   // listen for requests
 app.listen(8080, () => {
     console.log('Your app is listening on port 8080.');
   });
 
-app.use(express.static('public'));
-
-
-  morgan = require('morgan');
-
-
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-  });
-  app.use(morgan("common"));
   
