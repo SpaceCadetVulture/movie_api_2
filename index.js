@@ -5,7 +5,7 @@ const Movies = Models.Movie;
 const Users = Models.User;
 
 mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true });
-
+const bodyParser = require("body-parser");
 const express = require('express');
 const morgan = require('morgan');
 const app = express();
@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const fs = require('fs');
 const path = require('path');
-const bodyParser = require("body-parser");
+
 const uuid = require("uuid");
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'log.txt'), {flags: 'a'});
 
@@ -33,7 +33,7 @@ let users = [
         "email": "carlzzzjuinor@gmail.com",
         "birthday": "05/57/2000",
         "favoriteMovies": ["Shrek"]
-    }
+    },
     {
       "id": "3",
       "name": "james",
@@ -41,7 +41,7 @@ let users = [
       "email": "james90@gmail.com",
       "birthday": "05-06-1999",
       "favoriteMovies": ["Hitman"]
-  }
+  },
   {
     "id": "4",
     "name": "rosa",
