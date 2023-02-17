@@ -279,10 +279,17 @@ app.delete('/users/:Username', (req, res) => {
       });
   });
 
-//READ
+//get all movies
 app.get('/movies', (req, res) => {
-    res.status(200).json(movies);
-})
+  Movies.find()
+  .then((movies) => {
+  res.status(200).json(movies);
+  })
+  .catch((err) => {
+  console.error(err);
+  res.status(500).send('Error: ' + err);
+  });
+  });
 
 // Get all users
 app.get('/users', (req, res) => {
