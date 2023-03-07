@@ -332,16 +332,16 @@ app.get('/movies/:title', (req, res) => {
 })
 
 //READ
-app.get('/movies/genre/:genreName', (req, res) => {
-    const { genreName } = req.params;
-    const genre = movies.find(movie => movie.Genre.Name === genreName).Genre;
-    
-    if (genre){
-        res.status(200).json(genre);
-    } else{
-        res.status(400).send('genre not found');
-    }
-})
+app.get('/genre/:Name', passport.authenticate('jwt', { session: false }), (req, res) => {
+  Movies.findOne({ 'genre.Name': req.params.Name})
+  .then((genre) => {
+  res.json(genre.Genre);
+  })
+  .catch((err) => {
+  console.error(err);
+  res.status(500).send('Error: ' + err);
+  });
+  });
 
 //READ
 app.get('/movies/directors/:directorName', (req, res) => {
