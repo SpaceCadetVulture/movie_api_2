@@ -22,85 +22,6 @@ const accessLogStream = fs.createWriteStream(path.join(__dirname, 'log.txt'), {f
 
 app.use(morgan('combined', {stream: accessLogStream}));
 
-let users = [
-    {
-        "id": "1",
-        "name": "vito",
-        "favoriteMovies": []
-    },
-
-    {
-        "id": "2",
-        "name": "carl",
-        "password": "5555",
-        "email": "carlzzzjuinor@gmail.com",
-        "birthday": "05/57/2000",
-        "favoriteMovies": ["Shrek"]
-    },
-    {
-      "id": "3",
-      "name": "james",
-      "password": "1234",
-      "email": "james90@gmail.com",
-      "birthday": "05-06-1999",
-      "favoriteMovies": ["Hitman"]
-  },
-  {
-    "id": "4",
-    "name": "rosa",
-    "password": "1235",
-    "email": "rosaparks@gmail.com",
-    "birthday": "05-06-1963",
-    "favoriteMovies": ["300"]
-}
-
-];
-
-let movies = [
-    {
-        "Title":"Shrek",
-        "Description": " a drama about soul searching along with a donkey",
-        "Genre": {
-            "Name": "drama",
-            "Description": "Big green monster with donkey looking for love",
-        },
-        "Director": {
-            "Name": "James",
-            "Bio": " he is a director",
-            "Birth":"06/2000", 
-        },
-
-    },
-    {
-      "Title":"Hitman",
-      "Description": "Fast bullets, many dead",
-      "Genre": {
-          "Name": "action",
-          "Description": "bald dude trying to find who betrayed him",
-      },
-      "Director": {
-          "Name": "Grant",
-          "Bio": " Lovable fat white guy",
-          "Birth":"06/2000", 
-      },
-
-  },
-  {
-    "Title":"300",
-    "Description": " Fight for honor",
-    "Genre": {
-        "Name": "action",
-        "Description": "Sparta defeding the city-state",
-    },
-    "Director": {
-        "Name": "Dontknow",
-        "Bio": " pycho person",
-        "Birth":"06/2912", 
-    },
-
-},
-];
-
 app.use(express.static('public'));
 app.use(morgan("common"));
 app.use(bodyParser.json());
@@ -120,7 +41,8 @@ app.get("/", (req, res) => {
   Email: String,
   Birthday: Date
 }*/
-app.post('/users', (req, res) => {
+app.post('/users', passport.authenticate('jwt', { session: false }),
+(req, res) => {
     Users.findOne({ Username: req.body.Username })
       .then((user) => {
         if (user) {
@@ -147,7 +69,8 @@ app.post('/users', (req, res) => {
   });
 
 //UPDATE
-app.put('/users/:id', (req, res) => {
+app.put('/users/:id', passport.authenticate('jwt', { session: false }),
+(req, res) => {
     const { id } = req.params;
     const updatedUser = req.body;
 
@@ -172,7 +95,8 @@ app.put('/users/:id', (req, res) => {
   (required)
   Birthday: Date
 }*/
-app.put('/users/:Username', (req, res) => {
+app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
+(req, res) => {
     Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
       {
         Username: req.body.Username,
@@ -194,7 +118,7 @@ app.put('/users/:Username', (req, res) => {
 
 
 //POST
-app.post('/users/:id/:movieTitle', (req, res) => {
+app.post('/users/:id/:movieTitle', passport.authenticate('jwt', { session: false }),(req, res) => {
     const { id, movieTitle } = req.params;
 
     let user = users.find(user => user.id == id);
@@ -208,7 +132,8 @@ app.post('/users/:id/:movieTitle', (req, res) => {
 })
 
 // Add a movie to a user's list of favorites
-app.post('/users/:Username/movies/:MovieID', (req, res) => {
+app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), 
+(req, res) => {
     Users.findOneAndUpdate({ Username: req.params.Username }, {
        $push: { FavoriteMovies: req.params.MovieID }
      },
@@ -224,7 +149,8 @@ app.post('/users/:Username/movies/:MovieID', (req, res) => {
   });
 
   // remove movie from a user's list of favorites
-  app.delete('/users/:Username/movies/:MovieID', (req, res) => {
+  app.delete('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), 
+  (req, res) => {
     Users.findOneAndUpdate({ Username: req.params.Username }, {
        $pull: { FavoriteMovies: req.params.MovieID }
      },
@@ -240,47 +166,50 @@ app.post('/users/:Username/movies/:MovieID', (req, res) => {
   });
 
 //DELETE
-app.delete('/users/:id/:movieTitle', (req, res) => {
-    const { id, movieTitle } = req.params;
+app.delete('/users/:id/:movieTitle', passport.authenticate('jwt', { session: false }),
+(req, res) => {
+  const { id, movieTitle } = req.params;
 
-    let user = users.find(user => user.id == id);
+  let user = users.find(user => user.id == id);
 
-    if(user) {
-        user.favoriteMovies = user.favoriteMovies.filter( title => title !== movieTitle )
-        res.status(201).send(`${movieTitle} has been removed from user ${id}'s array`);
-    }else{
-        res.status(400).send('user does not exist')
-    }
+  if(user) {
+      user.favoriteMovies = user.favoriteMovies.filter( title => title !== movieTitle )
+      res.status(201).send(`${movieTitle} has been removed from user ${id}'s array`);
+  }else{
+      res.status(400).send('user does not exist')
+  }
 })
 
 //DELETE
-app.delete('/users/:id', (req, res) => {
-    const { id } = req.params;
+app.delete('/users/:id', passport.authenticate('jwt', { session: false }),
+(req, res) => {
+  const { id } = req.params;
 
-    let user = users.find(user => user.id == id);
+  let user = users.find(user => user.id == id);
 
-    if(user) {
-        users = users.filter( user => user.id != id )
-        res.status(201).send(` user ${id} has been deleted `);
-    }else{
-        res.status(400).send('user does not exist')
-    }
+  if(user) {
+      users = users.filter( user => user.id != id )
+      res.status(201).send(` user ${id} has been deleted `);
+  }else{
+      res.status(400).send('user does not exist')
+  }
 })
+
 // Delete a user by username
-app.delete('/users/:Username', (req, res) => {
-    Users.findOneAndRemove({ Username: req.params.Username })
-      .then((user) => {
-        if (!user) {
-          res.status(400).send(req.params.Username + ' was not found');
-        } else {
-          res.status(200).send(req.params.Username + ' was deleted.');
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send('Error: ' + err);
-      });
-  });
+app.delete('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
+  Users.findOneAndRemove({ Username: req.params.Username })
+    .then((user) => {
+      if (!user) {
+        res.status(400).send(req.params.Username + ' was not found');
+      } else {
+        res.status(200).send(req.params.Username + ' was deleted.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
 
 //get all movies
 
@@ -306,7 +235,7 @@ app.get('/users', (req, res) => {
         res.status(500).send('Error: ' + err);
       });
   });
-  
+
   // Get a user by username
 app.get('/users/:Username', (req, res) => {
     Users.findOne({ Username: req.params.Username })
@@ -320,40 +249,52 @@ app.get('/users/:Username', (req, res) => {
   });
 
 //READ
-app.get('/movies/:title', (req, res) => {
-    const { title } = req.params;
-    const movie = movies.find(movie => movie.Title === title);
-    
-    if (movie){
-        res.status(200).json(movie);
-    } else{
-        res.status(400).send('movie not found');
-    }
-})
+app.get("/movies/:title", passport.authenticate('jwt', { session: false }), (req, res) => {
+  Movies.findOne({ Title: req.params.title }) // Find the movie by title
+    .then((movies) => {
+      if (movies) {
+        // If movie was found, return json, else throw error
+        res.status(200).json(movies);
+      } else {
+        res.status(400).send("Movie not found");
+      }
+    })
+    .catch((err) => {
+      res.status(500).send("Error: " + err);
+    });
+});
 
 //READ
-app.get('/genre/:Name', passport.authenticate('jwt', { session: false }), (req, res) => {
-  Movies.findOne({ 'genre.Name': req.params.Name})
-  .then((genre) => {
-  res.json(genre.Genre);
+app.get("/movies/genre/:genreName", passport.authenticate('jwt', { session: false }), (req, res) => {
+  Movies.findOne({ "Genre.Name": req.params.name }) // Find one movie with the genre by genre name
+  .then((movies) => {
+    if (movies) {
+      // If a movie with the genre was found, return json of genre info, else throw error
+      res.status(200).json(movies.Genre);
+    } else {
+      res.status(400).send("Genre not found");
+    }
   })
   .catch((err) => {
-  console.error(err);
-  res.status(500).send('Error: ' + err);
+    res.status(500).send("Error: " + err);
   });
-  });
+});
 
 //READ
-app.get('/movies/directors/:directorName', (req, res) => {
-    const { directorName } = req.params;
-    const director = movies.find(movie => movie.Director.Name === directorName).Director;
-    
-    if (director){
-       return res.status(200).json(director);
-    } else{
-        res.status(400).send('director not found');
-    } 
-})
+app.get("/movies/director/:name", passport.authenticate('jwt', { session: false }), (req, res) => {
+  Movies.findOne({ "Director.Name": req.params.name }) // Find one movie with the director by name
+    .then((movies) => {
+      if (movies) {
+        // If a movie with the director was found, return json of director info, else throw error
+        res.status(200).json(movies.Director);
+      } else {
+        res.status(400).send("Director not found");
+      }
+    })
+    .catch((err) => {
+      res.status(500).send("Error: " + err);
+    });
+});
 
 app.get('/documentation', (req, res) => {
   res.sendFile('public/documentation.html', {root: __dirname});
@@ -367,4 +308,3 @@ app.use((err, req, res, next) => {
 app.listen(8080, () => {
   console.log('Your app is listening on port 8080.');
 });
-
