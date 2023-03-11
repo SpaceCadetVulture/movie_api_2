@@ -115,22 +115,7 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
       }
     });
   });
-
-
-//POST
-app.post('/users/:id/:movieTitle', passport.authenticate('jwt', { session: false }),(req, res) => {
-    const { id, movieTitle } = req.params;
-
-    let user = users.find(user => user.id == id);
-
-    if(user) {
-        user.favoriteMovies.push(movieTitle);
-        res.status(201).send(`${movieTitle} has been added to user ${id}'s array`);
-    }else{
-        res.status(400).send('user does not exist')
-    }
-})
-
+  
 // Add a movie to a user's list of favorites
 app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), 
 (req, res) => {
@@ -265,20 +250,17 @@ app.get("/movies/:title", passport.authenticate('jwt', { session: false }), (req
 });
 
 //READ
-app.get("/movies/genre/:genreName", passport.authenticate('jwt', { session: false }), (req, res) => {
-  Movies.findOne({ "Genre.Name": req.params.name }) // Find one movie with the genre by genre name
-  .then((movies) => {
-    if (movies) {
-      // If a movie with the genre was found, return json of genre info, else throw error
-      res.status(200).json(movies.Genre);
-    } else {
-      res.status(400).send("Genre not found");
-    }
+app.get('/movies/genre/:genreName', (req, res) => {
+  const { genreName } = req.params;
+  Movies.findOne({ "genre.Name": genreName })
+  .then((genre) => {
+  res.json(genre.Genre);
   })
   .catch((err) => {
-    res.status(500).send("Error: " + err);
+  console.error(err);
+  res.status(500).send("Error: " + err);
   });
-});
+  });
 
 //READ
 app.get("/movies/director/:name", passport.authenticate('jwt', { session: false }), (req, res) => {
